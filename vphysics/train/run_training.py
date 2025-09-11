@@ -15,13 +15,13 @@ import torch._functorch.config as functorch_config
 import yaml
 from yaml import CLoader
 
-from pfm.models.model_utils import get_model
-from train.train_base import Trainer
-from train.utils.optimizer import get_optimizer
-from train.utils.lr_scheduler import get_lr_scheduler
-from data.dataloader import get_dataloader
-from train.utils.checkpoint_utils import load_checkpoint
-from train.utils.wandb_logger import WandbLogger
+from vphysics.models.model_utils import get_model
+from vphysics.train.train_base import Trainer
+from vphysics.train.utils.optimizer import get_optimizer
+from vphysics.train.utils.lr_scheduler import get_lr_scheduler
+from vphysics.data.dataloader import get_dataloader
+from vphysics.train.utils.checkpoint_utils import load_checkpoint
+from vphysics.train.utils.wandb_logger import WandbLogger
 
 
 def load_config(config_path: Path) -> dict:

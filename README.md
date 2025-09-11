@@ -5,7 +5,7 @@ Improve long-horizon physics predictions with verifyable rewards RL
 
 ```bash
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu129
-pip install the_well wandb python-dotenv
+pip install the_well wandb python-dotenv pytest
 ```
 
 Create a `.env` file with your Weights & Biases API key:
