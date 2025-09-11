@@ -1,0 +1,66 @@
+################################################################
+########### Dataset parameters ############################
+################################################################
+data_path: "/home/pfm/data"
+
+################################################################
+########### Simulation parameters ############################
+################################################################
+time_limit: "24:00:00"
+checkpoint_name: "latest"
+
+################################################################
+########### General parameters ############################
+################################################################
+mem_budget: 1 # memory budget in percent of total memory. # if below 1, use gradient checkpointing
+seed: 42
+batch_size: 64 # batch size per GPU
+total_updates: 600e3 # number of batches to use for training
+updates_per_epoch: 1000 # number of updates per epoch
+checkpoint_every_updates: 1e3 # number of updates between checkpoints
+
+################################################################
+########### Dataloader parameters ############################
+################################################################
+num_workers: 16 # number of workers for dataloader per GPU
+
+################################################################
+########### Optimizer parameters ############################
+################################################################
+optimizer:
+  name: AdamW # optimizer name (Adam, AdamW)
+  learning_rate: 1e-4
+  weight_decay: 0.01
+  betas: [0.9, 0.999]
+
+################################################################
+########### LRScheduler parameters ############################
+################################################################
+lr_scheduler:
+  first_stage:
+    name: LinearLR # linear warmup scheduler
+    start_factor: 0.001
+    end_factor: 1.0
+    num_updates: 5000 # number of updates for linear warmup
+  # second_stage:
+  #   name: CosineAnnealingLR # cosine annealing scheduler
+  #   num_updates: -1 # num batches for cosine annealing, -1 means use all remaining batches
+  #   end_factor: 0.01 # percentage of initial learning rate to use as minimum learning rate
+    # name: LinearLR # linear 
+    # end_factor: 0.0001
+    # num_updates: -1 # number of batches for for second stage, -1 means use all remaining batches
+  # third_stage:
+  #   name: LinearLR # linear cool down scheduler
+  #   end_factor: 0
+  #   num_updates: 10 # number of batches for linear cool down
+
+################################################################
+########### WandB parameters ############################
+################################################################
+wandb:
+  project: pfm
+  entity: pfm
+  tags:
+    - train
+    - pfm
+  notes: "Training PFM"
