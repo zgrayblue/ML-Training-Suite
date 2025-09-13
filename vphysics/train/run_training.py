@@ -111,18 +111,25 @@ def main(
     ###### Load checkpoint #####################################
     ############################################################
 
-    checkpoint_name = config.get("checkpoint_name", None)
+    samples_trained = 0
+    batches_trained = 0
+    epoch = 0
+    grad_scaler_sd: Optional[dict] = None
+
+    cp_config: dict = config.get("checkpoint", {})
+    checkpoint_name = cp_config.get("checkpoint_name", None)
     if checkpoint_name is not None:
         checkpoint_path = get_checkpoint_path(output_dir, checkpoint_name)
         checkpoint = load_checkpoint(checkpoint_path, device)
         model.load_state_dict(checkpoint["model_state_dict"], strict=True)
-        optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
-        lr_scheduler.load_state_dict(checkpoint["scheduler_state_dict"])
-        grad_scaler_sd = checkpoint["grad_scaler_state_dict"]
+        if cp_config.get("restart", True):
+            optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+            lr_scheduler.load_state_dict(checkpoint["scheduler_state_dict"])
+            grad_scaler_sd = checkpoint["grad_scaler_state_dict"]
 
-        samples_trained = checkpoint["samples_trained"]
-        batches_trained = checkpoint["batches_trained"]
-        epoch = checkpoint["epoch"]
+            samples_trained = checkpoint["samples_trained"]
+            batches_trained = checkpoint["batches_trained"]
+            epoch = checkpoint["epoch"]
 
     ############################################################
     ###### Compile and distribute model #########################

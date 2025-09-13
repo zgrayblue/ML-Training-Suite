@@ -7,7 +7,10 @@ data_path: "/home/pfm/data"
 ########### Simulation parameters ############################
 ################################################################
 time_limit: "24:00:00"
-checkpoint_name: "latest"
+
+checkpoint:
+  checkpoint_name: "latest" # null, "latest", "best", or number of epoch to load
+  restart: true # if true, load optimizer and lr scheduler states from checkpoint, if false, only load model weights
 
 ################################################################
 ########### General parameters ############################
@@ -46,7 +49,7 @@ lr_scheduler:
   #   name: CosineAnnealingLR # cosine annealing scheduler
   #   num_updates: -1 # num batches for cosine annealing, -1 means use all remaining batches
   #   end_factor: 0.01 # percentage of initial learning rate to use as minimum learning rate
-    # name: LinearLR # linear 
+    # name: LinearLR # linear
     # end_factor: 0.0001
     # num_updates: -1 # number of batches for for second stage, -1 means use all remaining batches
   # third_stage:
