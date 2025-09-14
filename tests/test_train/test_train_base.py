@@ -5,7 +5,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from vphysics.train.train_base import Trainer, TrainingState
-from vphysics.train.utils.loss_fns import RMSE
+from vphysics.models.loss_fns import RMSE
 
 
 @pytest.fixture
@@ -130,6 +130,8 @@ class TestTrainer:
             val_dataloader=real_dataloader,
             total_updates=100,
             updates_per_epoch=10,
+            checkpoint_every_updates=50,
+            loss_fns={"RMSE": RMSE(dims=None)},
             output_dir=temp_output_dir,
             wandb_logger=None,
             time_limit=None,
@@ -163,12 +165,7 @@ class TestTrainer:
         assert trainer.state.batch_size == 2  # dataloader batch_size * world_size
 
         # Check loss functions
-        assert "rmse" in trainer.loss_fns
-        assert "mse" in trainer.loss_fns
-        assert "mae" in trainer.loss_fns
-        assert isinstance(trainer.loss_fns["rmse"], RMSE)
-        assert isinstance(trainer.loss_fns["mse"], nn.MSELoss)
-        assert isinstance(trainer.loss_fns["mae"], nn.L1Loss)
+        assert isinstance(trainer.loss_fns["RMSE"], RMSE)
 
     def test_train_updates(
         self,
@@ -188,6 +185,8 @@ class TestTrainer:
             lr_scheduler=real_lr_scheduler,
             train_dataloader=real_dataloader,
             val_dataloader=real_dataloader,
+            checkpoint_every_updates=50,
+            loss_fns={"RMSE": RMSE(dims=None)},
             total_updates=100,
             updates_per_epoch=10,
             output_dir=temp_output_dir,
@@ -225,6 +224,8 @@ class TestTrainer:
             lr_scheduler=real_lr_scheduler,
             train_dataloader=real_dataloader,
             val_dataloader=real_dataloader,
+            checkpoint_every_updates=50,
+            loss_fns={"RMSE": RMSE(dims=None)},
             total_updates=100,
             updates_per_epoch=10,
             output_dir=temp_output_dir,
@@ -250,6 +251,8 @@ class TestTrainer:
             lr_scheduler=real_lr_scheduler,
             train_dataloader=real_dataloader,
             val_dataloader=real_dataloader,
+            checkpoint_every_updates=50,
+            loss_fns={"RMSE": RMSE(dims=None)},
             total_updates=2,  # Small number for testing
             updates_per_epoch=1,
             output_dir=temp_output_dir,
@@ -274,6 +277,8 @@ class TestTrainer:
             lr_scheduler=real_lr_scheduler,
             train_dataloader=real_dataloader,
             val_dataloader=real_dataloader,
+            checkpoint_every_updates=50,
+            loss_fns={"RMSE": RMSE(dims=None)},
             total_updates=100,
             updates_per_epoch=10,
             output_dir=temp_output_dir,

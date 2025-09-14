@@ -148,7 +148,7 @@ class VMSE(MSE):
         """
         mse = super().forward(pred, target)
         # Calculate variance
-        norm = torch.std(target, dim=self.dims, keepdim=True) ** 2 + 1e-6
+        norm = torch.std(target, dim=self.dims) ** 2 + 1e-6
         return mse / norm
 
 

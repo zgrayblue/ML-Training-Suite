@@ -10,7 +10,6 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 
 from vphysics.train.utils.logger import setup_logger
 from vphysics.train.utils.wandb_logger import WandbLogger
-from vphysics.train.utils.loss_fns import RMSE
 from vphysics.train.utils.run_utils import (
     compute_metrics,
     reduce_all_losses,
