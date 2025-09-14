@@ -33,6 +33,84 @@ class TrainingState:
 
 
 class Trainer:
+    """
+    A comprehensive training framework for PyTorch models with distributed training support.
+
+    This trainer handles the complete training lifecycle including model training, validation,
+    checkpointing, logging, and time management. It supports distributed data parallel (DDP)
+    training, automatic mixed precision (AMP), and integrates with Weights & Biases for
+    experiment tracking.
+
+    Parameters
+    ----------
+    model : torch.nn.Module or DDP or Any
+        The PyTorch model to train. Can be a regular nn.Module or DDP-wrapped model.
+    optimizer : torch.optim.Optimizer
+        PyTorch optimizer for parameter updates.
+    criterion : torch.nn.Module
+        Loss function used for training.
+    lr_scheduler : torch.optim.lr_scheduler.LRScheduler
+        Learning rate scheduler for adaptive learning rates.
+    train_dataloader : torch.utils.data.DataLoader
+        DataLoader for training data.
+    val_dataloader : torch.utils.data.DataLoader
+        DataLoader for validation data.
+    total_updates : int
+        Total number of training updates/batches to perform.
+    updates_per_epoch : int
+        Number of updates to perform per epoch (before eval is done again).
+    checkpoint_every_updates : int
+        Frequency of checkpoint saves (in updates).
+    output_dir : Path
+        Directory path where checkpoints and logs will be saved.
+    loss_fns : dict
+        Dictionary of additional loss functions for metric computation.
+        The criterion should be also included in this dictionary.
+    time_limit : float, optional
+        Time limit (in seconds) for training. If specified, training will stop
+        gracefully before this limit is reached.
+    wandb_logger : WandbLogger, optional
+        Weights & Biases logger for experiment tracking.
+    global_rank : int, default 0
+        Global rank of current process in distributed training.
+    local_rank : int, default 0
+        Local rank of current process within a node.
+    world_size : int, default 1
+        Total number of processes in distributed training.
+
+    Attributes
+    ----------
+    state : TrainingState
+        TrainingState object tracking current training progress.
+    device : torch.device
+        PyTorch device (CUDA or CPU) used for training.
+    ddp_enabled : bool
+        Boolean indicating if distributed training is active.
+    use_amp : bool
+        Boolean indicating if automatic mixed precision is enabled.
+    scaler : GradScaler
+        GradScaler for automatic mixed precision training.
+    time_keeper : TimeKeeper
+        TimeKeeper instance for managing training time limits.
+
+    Examples
+    --------
+    >>> trainer = Trainer(
+    ...     model=my_model,
+    ...     optimizer=optimizer,
+    ...     criterion=nn.MSELoss(),
+    ...     lr_scheduler=scheduler,
+    ...     train_dataloader=train_loader,
+    ...     val_dataloader=val_loader,
+    ...     total_updates=10000,
+    ...     updates_per_epoch=1000,
+    ...     checkpoint_every_updates=500,
+    ...     output_dir=Path("./outputs"),
+    ...     loss_fns={"rmse": RMSE()}
+    ... )
+    >>> trainer.run()
+    """
+
     def __init__(
         self,
         model: torch.nn.Module | DDP | Any,
@@ -45,6 +123,7 @@ class Trainer:
         updates_per_epoch: int,
         checkpoint_every_updates: int,
         output_dir: Path,
+        loss_fns: dict,
         time_limit: Optional[float] = None,
         wandb_logger: Optional[WandbLogger] = None,
         global_rank: int = 0,
@@ -71,11 +150,7 @@ class Trainer:
 
         self.time_keeper = TimeKeeper(time_limit=time_limit, global_rank=global_rank)
 
-        self.loss_fns = {
-            "rmse": RMSE(),
-            "mse": torch.nn.MSELoss(),
-            "mae": torch.nn.L1Loss(),
-        }
+        self.loss_fns = loss_fns
 
         self.device = (
             torch.device(f"cuda:{self.local_rank}")
@@ -86,12 +161,17 @@ class Trainer:
         self.use_amp = True
         self.scaler = GradScaler(device=str(self.device), enabled=self.use_amp)
 
+        if train_dataloader.batch_size is not None:
+            batch_size = train_dataloader.batch_size * world_size
+        else:
+            batch_size = 1
+
         self.state = TrainingState(
             epoch=1,
             samples_trained=0,
             batches_trained=0,
             current_lr=self.optimizer.param_groups[0]["lr"],
-            batch_size=train_dataloader.batch_size * world_size,
+            batch_size=batch_size,
             shutdown=torch.tensor(False, device=self.device),
         )
 
@@ -239,6 +319,29 @@ class Trainer:
                 }
                 self.wandb_logger.log(log_state, folder="train", commit=False)
                 self.wandb_logger.log(current_metrics, folder="train", commit=True)
+
+            ###################################################################################
+            ######################## Checkpointing ############################################
+            ###################################################################################
+            next_checkpoint = (
+                self.state.batches_trained // self.checkpoint_every_updates + 1
+            ) * self.checkpoint_every_updates
+
+            if self.state.batches_trained >= next_checkpoint - 1:
+                if self.ddp_enabled:
+                    dist.barrier()
+                if self.global_rank == 0:
+                    save_checkpoint(
+                        checkpoint_path=self.output_dir / "latest.pt",
+                        model=self.model,
+                        optimizer=self.optimizer,
+                        samples_trained=self.state.samples_trained,
+                        batches_trained=self.state.batches_trained,
+                        epoch=self.state.epoch,
+                        grad_scaler=self.scaler,
+                        scheduler=self.lr_scheduler,
+                    )
+                    self.log_msg("Saved latest checkpoint")
 
             if i >= n_updates - 1:
                 break
