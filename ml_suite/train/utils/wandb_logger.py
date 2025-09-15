@@ -25,13 +25,18 @@ class WandbLogger:
     ----------
     config : dict
         Configuration dictionary containing wandb settings
+    log_dir : Optional[Path], optional
+        Directory to save wandb logs, by default None
+        Usually to store the logs in the same directory as checkpoints
     """
 
     def __init__(
         self,
         wandb_config: dict,
+        log_dir: Optional[Path] = None,
     ):
         self.config = wandb_config
+        self.config["dir"] = log_dir
         self.logger = setup_logger(
             "WandbLogger",
         )
@@ -46,12 +51,14 @@ class WandbLogger:
             entity = self.config.get("entity")
             tags = self.config.get("tags", [])
             notes = self.config.get("notes", "")
+            dir = self.config.get("dir", None)
             wandb.login()
             self.run = wandb.init(
                 project=project,
                 entity=entity,
                 config=self.config,
                 id=wandb_id,
+                dir=dir,
                 tags=tags,
                 notes=notes,
                 resume="allow",
@@ -171,3 +178,4 @@ class WandbLogger:
     #         self.run.log(data)
     #     except Exception as e:
     #         self.logger.error(f"Failed to log predictions to wandb: {str(e)}")
+
