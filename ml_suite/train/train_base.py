@@ -48,7 +48,7 @@ class Trainer:
         PyTorch optimizer for parameter updates.
     criterion : torch.nn.Module
         Loss function used for training.
-    lr_scheduler : torch.optim.lr_scheduler.LRScheduler
+    lr_scheduler : Optional[torch.optim.lr_scheduler.LRScheduler]
         Learning rate scheduler for adaptive learning rates.
     train_dataloader : torch.utils.data.DataLoader
         DataLoader for training data.
@@ -106,7 +106,7 @@ class Trainer:
         model: torch.nn.Module | DDP | Any,
         optimizer: torch.optim.Optimizer,
         criterion: torch.nn.Module,
-        lr_scheduler: torch.optim.lr_scheduler.LRScheduler,
+        lr_scheduler: Optional[torch.optim.lr_scheduler.LRScheduler],
         train_dataloader: torch.utils.data.DataLoader,
         val_dataloader: torch.utils.data.DataLoader,
         total_updates: int,

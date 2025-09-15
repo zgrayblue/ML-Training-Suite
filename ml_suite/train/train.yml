@@ -64,6 +64,7 @@ max_grad_norm: null # null, or float for gradient clipping (stabilizes training)
 ################################################################
 ########### LRScheduler parameters ############################
 ################################################################
+# Delete section to deactivate LR scheduling
 lr_scheduler:
   first_stage:
     name: LinearLR # linear warmup scheduler

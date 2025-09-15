@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Optional
 
 import torch
 from torch.amp.grad_scaler import GradScaler
@@ -60,7 +61,7 @@ def save_checkpoint(
     batches_trained: int,
     epoch: int,
     grad_scaler: GradScaler,
-    scheduler: torch.optim.lr_scheduler.LRScheduler,
+    scheduler: Optional[torch.optim.lr_scheduler.LRScheduler],
 ) -> None:
     """Save a checkpoint."""
     checkpoint = {
@@ -70,6 +71,7 @@ def save_checkpoint(
         "model_state_dict": sanitize_model_dict(model),
         "optimizer_state_dict": optimizer.state_dict(),
         "grad_scaler_state_dict": grad_scaler.state_dict(),
-        "scheduler_state_dict": scheduler.state_dict(),
     }
+    if scheduler is not None:
+        checkpoint["scheduler_state_dict"] = scheduler.state_dict()
     torch.save(checkpoint, checkpoint_path)

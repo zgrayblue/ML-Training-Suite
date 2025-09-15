@@ -49,6 +49,7 @@ DATA_DIR=/path/to/your/data/dir
 ## Notes
 
 - The training script uses number of gradient updates (number of batches) instead of epochs to determine training duration. This is to ensure consistent training time across different dataset sizes and batch sizes. The config parameter `updates_per_epoch` controls how many updates are done per evaluation cycle. If you want to train "x number of epochs", you can either calculate the respective number of updates or adapt the code.
+- Similarly, the LR schedulers assume updates, not epochs as steps.
 - The script supports resuming training from a checkpoint. If a checkpoint is found in the results directory, training will resume from the latest checkpoint. You can also specify a specific checkpoint to resume from in the config file.
 - Automatic Mixed Precision (AMP) is enabled by default for faster training. You can disable it in the config file if needed. Not all models support AMP. Same thing for torch.compile. Use the ``mem_budget`` parameter to control memory usage. With this, you can run a model with a larger batch size than your GPU memory would normally allow at the cost of some additional computation time.
 - The suite includes chained LR schedulers (up to three). You can configure them in the config file. The first scheduler is applied first for x number of updates, followed by the second, and then the third. They also work on restarting from a checkpoint.

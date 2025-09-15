@@ -74,6 +74,15 @@ def main(
     batch_size = int(config["batch_size"])
     num_workers = int(config["num_workers"])
 
+    total_updates = int(config["total_updates"])
+    updates_per_epoch = int(config["updates_per_epoch"])
+    cp_every_updates = int(config["checkpoint_every_updates"])
+    wandb_logger = WandbLogger(config["wandb"])
+
+    samples_trained = 0
+    batches_trained = 0
+    epoch = 0
+
     ############################################################
     ###### AMP #################################################
     ############################################################
@@ -89,6 +98,8 @@ def main(
         amp_precision = torch.float32
 
     max_grad_norm = config.get("max_grad_norm", None)
+    if max_grad_norm is not None:
+        max_grad_norm = float(max_grad_norm)
 
     torch.set_float32_matmul_precision("high")
     if torch.cuda.is_available():
@@ -108,8 +119,17 @@ def main(
         raise ValueError(f"Unknown criterion {criterion}")
 
     optimizer = get_optimizer(model, config["optimizer"])
-    lr_scheduler = get_lr_scheduler(optimizer, config["lr_scheduler"])
     dataset = get_dataset(config["dataset"])
+    lr_config = config.get("lr_scheduler", None)
+    if lr_config is not None:
+        lr_scheduler = get_lr_scheduler(
+            optimizer,
+            lr_config,
+            total_batches=total_updates,
+            total_batches_trained=batches_trained,
+        )
+    else:
+        lr_scheduler = None
 
     # these are used for evaluation during training (Wandb logging)
     # these are NOT the loss functions used for training (see criterion)
@@ -141,18 +161,10 @@ def main(
         is_distributed=dist.is_initialized(),
         shuffle=False,
     )
-    total_updates = int(config["total_updates"])
-    updates_per_epoch = int(config["updates_per_epoch"])
-    cp_every_updates = int(config["checkpoint_every_updates"])
-    wandb_logger = WandbLogger(config["wandb"])
-
     ############################################################
     ###### Load checkpoint #####################################
     ############################################################
 
-    samples_trained = 0
-    batches_trained = 0
-    epoch = 0
     grad_scaler_sd: Optional[dict] = None
 
     cp_config: dict = config.get("checkpoint", {})
@@ -163,12 +175,22 @@ def main(
         model.load_state_dict(checkpoint["model_state_dict"], strict=True)
         if cp_config.get("restart", True):
             optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
-            lr_scheduler.load_state_dict(checkpoint["scheduler_state_dict"])
+
             grad_scaler_sd = checkpoint["grad_scaler_state_dict"]
 
             samples_trained = checkpoint["samples_trained"]
             batches_trained = checkpoint["batches_trained"]
             epoch = checkpoint["epoch"]
+
+            if lr_scheduler and lr_config is not None:
+                # we have to recreate lr-s with correct batches trained
+                lr_scheduler = get_lr_scheduler(
+                    optimizer,
+                    lr_config,
+                    total_batches=total_updates,
+                    total_batches_trained=batches_trained,
+                )
+                lr_scheduler.load_state_dict(checkpoint["scheduler_state_dict"])
 
     ############################################################
     ###### Compile and distribute model #########################
