@@ -8,7 +8,8 @@ def sanitize_model_dict(model: torch.nn.Module) -> dict:
     """Sanitize a model's state dict for saving.
 
     This function removes any prefixes added by distributed training or compiling
-    from the state dict keys.
+    from the state dict keys. This is useful to ensure compatibility when loading
+    the model in different environments.
 
     Parameters
     ----------

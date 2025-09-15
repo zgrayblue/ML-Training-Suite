@@ -3,12 +3,12 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "vphysics"
+name = "training_suite"
 version = "0.0.1"
 authors = [
     { name = "Florian Wiesner", email = "wiesnerflorian94@gmail.com" },
 ]
-description = "A library for verifiable physics simulations"
+description = "A library for training neural networks"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

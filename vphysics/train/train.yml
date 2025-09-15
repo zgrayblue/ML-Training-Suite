@@ -10,14 +10,17 @@ time_limit: "24:00:00"
 
 checkpoint:
   checkpoint_name: "latest" # null, "latest", "best", or number of epoch to load
-  restart: true # if true, load optimizer and lr scheduler states from checkpoint, if false, only load model weights
+
+  # if true, load optimizer and lr scheduler states from checkpoint
+  # if false, only load model weights, and reset optimizer and lr scheduler states. This is useful for fine-tuning.
+  restart: true
 
 ################################################################
 ########### General parameters ############################
 ################################################################
 mem_budget: 1 # memory budget in percent of total memory. # if below 1, use gradient checkpointing
 seed: 42
-batch_size: 64 # batch size per GPU
+batch_size: 64 # batch size per GPU!!!!
 total_updates: 600e3 # number of batches to use for training
 updates_per_epoch: 1000 # number of updates per epoch
 checkpoint_every_updates: 1e3 # number of updates between checkpoints
@@ -29,7 +32,7 @@ precision: bfloat16 # precision for automatic mixed precision (float16, bfloat16
 ########### Model parameters ############################ ####
 ################################################################
 model:
-  name: vphysics
+  name: my_model
   type: transformer
   num_layers: 12
   hidden_size: 768
@@ -65,25 +68,22 @@ lr_scheduler:
     start_factor: 0.001
     end_factor: 1.0
     num_updates: 5000 # number of updates for linear warmup
-  # second_stage:
-  #   name: CosineAnnealingLR # cosine annealing scheduler
-  #   num_updates: -1 # num batches for cosine annealing, -1 means use all remaining batches
-  #   end_factor: 0.01 # percentage of initial learning rate to use as minimum learning rate
-    # name: LinearLR # linear
-    # end_factor: 0.0001
-    # num_updates: -1 # number of batches for for second stage, -1 means use all remaining batches
-  # third_stage:
-  #   name: LinearLR # linear cool down scheduler
-  #   end_factor: 0
-  #   num_updates: 10 # number of batches for linear cool down
+  second_stage:
+    name: CosineAnnealingLR # cosine annealing scheduler
+    num_updates: -1 # num batches for cosine annealing, -1 means use all remaining batches to wind down
+    end_factor: 0.01 # percentage of initial learning rate to use as minimum learning rate
+  third_stage:
+    name: LinearLR # linear cool down scheduler
+    end_factor: 0
+    num_updates: 10 # number of batches for linear cool down
 
 ################################################################
 ########### WandB parameters ############################
 ################################################################
 wandb:
-  project: pfm
-  entity: pfm
+  project: my_ml_project
+  entity: my_wandb_username
   tags:
     - train
-    - pfm
-  notes: "Training PFM"
+    - test
+  notes: "Training my first model"

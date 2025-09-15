@@ -37,6 +37,14 @@ def get_optimizer(model: nn.Module, config: dict) -> torch.optim.Optimizer:
             weight_decay=weight_decay,
             betas=betas,
         )
+    elif name == "Adam":
+        betas = config.get("betas", (0.9, 0.999))
+
+        optimizer = optim.Adam(
+            model.parameters(),
+            lr=lr,
+            betas=betas,
+        )
     else:
         raise ValueError(f"Optimizer {name} not supported")
 

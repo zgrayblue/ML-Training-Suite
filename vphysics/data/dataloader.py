@@ -1,4 +1,4 @@
-"""DataLoader for the WellDatasets.
+"""DataLoader for the Dataset.
 
 By: Florian Wiesner
 Date: 2025-09-11
@@ -9,14 +9,13 @@ from torch.utils.data import (
     RandomSampler,
     SequentialSampler,
     DistributedSampler,
+    Dataset,
 )
 import torch
 
-from the_well.data.datasets import WellDataset
-
 
 def get_dataloader(
-    dataset: WellDataset,
+    dataset: Dataset,
     seed: int,
     batch_size: int,
     num_workers: int,
@@ -25,9 +24,11 @@ def get_dataloader(
 ) -> DataLoader:
     """Get a dataloader for the dataset.
 
+    Uses the correct sampler depending on whether distributed training is used.
+
     Parameters
     ----------
-    dataset : WellDataset
+    dataset : Dataset
         Dataset to load.
     seed : int
         Seed for the dataset.

@@ -282,8 +282,8 @@ class Trainer:
             self.train_dataloader.sampler.set_epoch(epoch)
 
         for i, data in enumerate(self.train_dataloader):
-            x = data["input_fields"]
-            target = data["output_fields"]
+            x = data[0]
+            target = data[1]
             x = x.to(self.device)
             target = target.to(self.device)
 

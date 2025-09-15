@@ -1,3 +1,9 @@
+"""Utility functions for training and evaluation.
+
+By: Florian Wiesner
+Date: 2025-09-15
+"""
+
 from pathlib import Path, PurePath
 from typing import Optional
 

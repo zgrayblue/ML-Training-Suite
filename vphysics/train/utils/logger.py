@@ -5,7 +5,7 @@ from typing import Optional, TextIO
 
 
 def setup_logger(
-    name: str = "vphysics",
+    name: str = "logger",
     log_level: int = logging.INFO,
     log_file: Optional[Path] = None,
     stream: Optional[TextIO] = sys.stdout,
@@ -16,7 +16,7 @@ def setup_logger(
     Parameters
     ----------
     name : str, optional
-        Name of the logger, by default "pfm"
+        Name of the logger, by default "logger"
     log_level : int, optional
         Logging level, by default logging.INFO
     log_file : Optional[Path], optional

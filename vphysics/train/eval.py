@@ -95,8 +95,8 @@ class Evaluator:
 
         for i, data in enumerate(self.dataloader):
             self.log_msg(f"Batch {i + 1}/{len(self.dataloader)}")
-            x = data["input_fields"]
-            target = data["output_fields"]
+            x = data[0]
+            target = data[1]
             x = x.to(self.device)
             target = target.to(self.device)
 
@@ -119,18 +119,3 @@ class Evaluator:
             total_metrics[metric_name] /= len(self.dataloader)
 
         return total_metrics
-
-    @torch.inference_mode()
-    def vis_predictions(self):
-        """Visualize the predictions of the model."""
-        data = next(iter(self.dataloader))
-        x = data["input_fields"]
-        target = data["output_fields"]
-        x = x.to(self.device)
-        target = target.to(self.device)
-
-        with torch.amp.autocast(device_type=self.device.type, dtype=torch.bfloat16):
-            y = self.model(x)
-
-        # visualize the predictions
-        pass

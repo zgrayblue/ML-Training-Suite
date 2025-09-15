@@ -1,5 +1,5 @@
 """
-Custom loss functions for the transformer model.
+Custom loss functions.
 By: Florian Wiesner
 Date: 2025-04-25
 """

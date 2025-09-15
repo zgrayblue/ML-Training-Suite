@@ -1,3 +1,9 @@
+"""Utility class for monitoring training time and handling graceful shutdowns.
+
+By: Florian Wiesner
+Date: 2025-09-15
+"""
+
 import time
 from typing import Optional
 from dataclasses import dataclass
