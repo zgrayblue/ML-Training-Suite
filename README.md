@@ -61,4 +61,4 @@ DATA_DIR=/path/to/your/data/dir
 - Use WandB for tracking experiments, it provides a lot of useful features for monitoring and comparing experiments
 - Use the checkpointing feature to save and resume training, especially for long-running jobs
 - Linear warmup followed by cosine annealing is a good default choice for LR scheduling
-- For unstable training, try gradient clipping in the config file
+- For unstable training, try gradient clipping ``max_grad_norm`` in the config file
