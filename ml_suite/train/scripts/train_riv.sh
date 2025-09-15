@@ -52,17 +52,17 @@ export PATH="$CONDA_ROOT/bin:$PATH"
 conda activate train_env
 
 # Load environment variables from .env file
-if [ -f "$HOME/Coding/verifiable-physics/.env" ]; then
-    export $(grep -v '^#' "$HOME/Coding/verifiable-physics/.env" | xargs)
+if [ -f "$HOME/Coding/ML-Training-Suite/.env" ]; then
+    export $(grep -v '^#' "$HOME/Coding/ML-Training-Suite/.env" | xargs)
 fi
 
 ######################################################################################
 ############################# Set paths ##############################################
 ######################################################################################
 
-sim_name="vphysics-train"
+sim_name="train" # name of the folder where you placed the yaml config
 
-python_exec="${BASE_DIR}/ml-training-suite/train/run_training.py"
+python_exec="${BASE_DIR}/ml_suite/train/run_training.py"
 config_file="${DATA_DIR}/${sim_name}/train.yaml"
 
 nnodes=1
