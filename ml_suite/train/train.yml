@@ -27,6 +27,7 @@ checkpoint_every_updates: 1e3 # number of updates between checkpoints
 
 amp: true # use automatic mixed precision
 precision: bfloat16 # precision for automatic mixed precision (float16, bfloat16)
+compile: true # if true, use torch.compile to compile the model (PyTorch 2.0+)
 
 ###############################################################
 ########### Model parameters ############################ ####
