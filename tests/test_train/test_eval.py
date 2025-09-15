@@ -60,7 +60,7 @@ def test_eval(
         metrics=metrics,
         eval_dir=tmp_path,
     )
-    metrics = evaluator.eval()
+    losses = evaluator.eval()
 
-    for metric_name, metric_value in metrics.items():
+    for metric_name, metric_value in losses.items():
         assert metric_value.item() != 0.0
