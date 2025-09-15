@@ -78,7 +78,8 @@ echo "Starting training..."
 echo "config_file: $config_file"
 echo "--------------------------------"
 
-exec_args="--config_file $config_file"
+exec_args="--config_path $config_file"
 
 # Capture Python output and errors in a variable and run the script
+
 torchrun --standalone --nproc_per_node=$ngpus_per_node $python_exec $exec_args
