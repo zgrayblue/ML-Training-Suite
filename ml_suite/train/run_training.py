@@ -74,10 +74,12 @@ def main(
     batch_size = int(config["batch_size"])
     num_workers = int(config["num_workers"])
 
-    total_updates = int(config["total_updates"])
-    updates_per_epoch = int(config["updates_per_epoch"])
-    cp_every_updates = int(config["checkpoint_every_updates"])
-    wandb_logger = WandbLogger(config["wandb"])
+    total_updates = int(
+        float(config["total_updates"])
+    )  # first float to allow yaml scientific notation
+    updates_per_epoch = int(float(config["updates_per_epoch"]))
+    cp_every_updates = int(float(config["checkpoint_every_updates"]))
+    wandb_logger = WandbLogger(config["wandb"], log_dir=output_dir)
 
     samples_trained = 0
     batches_trained = 0
