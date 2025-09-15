@@ -94,7 +94,9 @@ class Evaluator:
             total_metrics[metric_name] = torch.tensor(0.0, device=self.device)
 
         for i, data in enumerate(self.dataloader):
-            self.log_msg(f"Batch {i + 1}/{len(self.dataloader)}")
+            if (i + 1) % 100 == 0 or i == 0:
+                self.log_msg(f"Batch {i + 1}/{len(self.dataloader)}")
+
             x = data[0]
             target = data[1]
             x = x.to(self.device)
