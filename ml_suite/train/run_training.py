@@ -199,7 +199,8 @@ def main(
     ############################################################
     model.to(device)
     functorch_config.activation_memory_budget = config.get("mem_budget", 1)
-    if not platform.system() == "Windows":
+    compile_model = config.get("compile", False)
+    if compile_model and not platform.system() == "Windows":
         model = torch.compile(model, mode="max-autotune")
     if world_size > 1:
         model = DDP(
