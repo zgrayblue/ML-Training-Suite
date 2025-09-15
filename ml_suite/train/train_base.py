@@ -129,7 +129,7 @@ class Trainer:
         self.lr_scheduler = lr_scheduler
         self.train_dataloader = train_dataloader
         self.val_dataloader = val_dataloader
-        self.logger = setup_logger("Trainer")
+        self.logger = setup_logger("ML Suite")
         self.wandb_logger = wandb_logger
         self.global_rank = global_rank
         self.local_rank = local_rank
