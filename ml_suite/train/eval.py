@@ -12,7 +12,7 @@ import torch
 from torch.utils.data import DataLoader
 import torch.distributed as dist
 
-from vphysics.train.utils.run_utils import compute_metrics, reduce_all_losses
+from ml_suite.train.utils.run_utils import compute_metrics, reduce_all_losses
 
 
 class Evaluator:

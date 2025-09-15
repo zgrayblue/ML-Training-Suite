@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from io import StringIO
-from vphysics.train.utils.logger import setup_logger
+from ml_suite.train.utils.logger import setup_logger
 
 
 class TestSetupLogger:

@@ -1,7 +1,7 @@
 import pytest
 import torch
 import torch.nn as nn
-from vphysics.train.utils.optimizer import get_optimizer
+from ml_suite.train.utils.optimizer import get_optimizer
 
 
 class TestGetOptimizer:
@@ -11,9 +11,9 @@ class TestGetOptimizer:
             "name": "AdamW",
             "learning_rate": 0.001
         }
-        
+
         optimizer = get_optimizer(model, config)
-        
+
         assert isinstance(optimizer, torch.optim.AdamW)
         assert optimizer.param_groups[0]["lr"] == 0.001
         assert optimizer.param_groups[0]["weight_decay"] == 0
@@ -27,9 +27,9 @@ class TestGetOptimizer:
             "weight_decay": 0.1,
             "betas": (0.8, 0.99)
         }
-        
+
         optimizer = get_optimizer(model, config)
-        
+
         assert isinstance(optimizer, torch.optim.AdamW)
         assert optimizer.param_groups[0]["lr"] == 0.01
         assert optimizer.param_groups[0]["weight_decay"] == 0.1
@@ -41,6 +41,6 @@ class TestGetOptimizer:
             "name": "SGD",
             "learning_rate": 0.001
         }
-        
+
         with pytest.raises(ValueError, match="Optimizer SGD not supported"):
             get_optimizer(model, config)

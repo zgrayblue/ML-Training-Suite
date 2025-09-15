@@ -8,15 +8,15 @@ import torch.distributed as dist
 from torch.amp.grad_scaler import GradScaler
 from torch.nn.parallel import DistributedDataParallel as DDP
 
-from vphysics.train.utils.logger import setup_logger
-from vphysics.train.utils.wandb_logger import WandbLogger
-from vphysics.train.utils.run_utils import (
+from ml_suite.train.utils.logger import setup_logger
+from ml_suite.train.utils.wandb_logger import WandbLogger
+from ml_suite.train.utils.run_utils import (
     compute_metrics,
     reduce_all_losses,
 )
-from vphysics.train.utils.time_keeper import TimeKeeper
-from vphysics.train.utils.checkpoint_utils import save_checkpoint
-from vphysics.train.eval import Evaluator
+from ml_suite.train.utils.time_keeper import TimeKeeper
+from ml_suite.train.utils.checkpoint_utils import save_checkpoint
+from ml_suite.train.eval import Evaluator
 
 
 @dataclass

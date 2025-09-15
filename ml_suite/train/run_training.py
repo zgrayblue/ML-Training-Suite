@@ -15,17 +15,17 @@ import torch._functorch.config as functorch_config
 import yaml
 from yaml import CLoader
 
-from vphysics.models.model_utils import get_model
-from vphysics.models.loss_fns import MAE, MSE, RMSE, NRMSE, VRMSE
+from ml_suite.models.model_utils import get_model
+from ml_suite.models.loss_fns import MAE, MSE, RMSE, NRMSE, VRMSE
 
-from vphysics.data.dataloader import get_dataloader
-from vphysics.data.dataset import get_dataset
+from ml_suite.data.dataloader import get_dataloader
+from ml_suite.data.dataset import get_dataset
 
-from vphysics.train.train_base import Trainer
-from vphysics.train.utils.optimizer import get_optimizer
-from vphysics.train.utils.lr_scheduler import get_lr_scheduler
-from vphysics.train.utils.checkpoint_utils import load_checkpoint
-from vphysics.train.utils.wandb_logger import WandbLogger
+from ml_suite.train.train_base import Trainer
+from ml_suite.train.utils.optimizer import get_optimizer
+from ml_suite.train.utils.lr_scheduler import get_lr_scheduler
+from ml_suite.train.utils.checkpoint_utils import load_checkpoint
+from ml_suite.train.utils.wandb_logger import WandbLogger
 
 
 def load_config(config_path: Path) -> dict:

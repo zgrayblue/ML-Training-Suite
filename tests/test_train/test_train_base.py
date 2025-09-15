@@ -4,8 +4,8 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
-from vphysics.train.train_base import Trainer, TrainingState
-from vphysics.models.loss_fns import RMSE
+from ml_suite.train.train_base import Trainer, TrainingState
+from ml_suite.models.loss_fns import RMSE
 
 
 @pytest.fixture

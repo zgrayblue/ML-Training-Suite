@@ -4,7 +4,7 @@ import pytest
 import torch
 from torch.utils.data import DataLoader
 
-from vphysics.train.eval import Evaluator
+from ml_suite.train.eval import Evaluator
 
 
 @pytest.fixture

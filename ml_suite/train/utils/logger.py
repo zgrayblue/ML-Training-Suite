@@ -5,7 +5,7 @@ from typing import Optional, TextIO
 
 
 def setup_logger(
-    name: str = "logger",
+    name: str = "ml_suite",
     log_level: int = logging.INFO,
     log_file: Optional[Path] = None,
     stream: Optional[TextIO] = sys.stdout,
@@ -16,7 +16,7 @@ def setup_logger(
     Parameters
     ----------
     name : str, optional
-        Name of the logger, by default "logger"
+        Name of the logger, by default "ml_suite"
     log_level : int, optional
         Logging level, by default logging.INFO
     log_file : Optional[Path], optional

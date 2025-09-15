@@ -32,11 +32,11 @@ DATA_DIR=/path/to/your/data/dir
 ```
 
 4. (Optional) Set up WandB account and project for experiment tracking
-5. Add your model code in the models directory and update the ``get_model`` function in `vphysics/models/model_utils.py`
+5. Add your model code in the models directory and update the ``get_model`` function in `ml_suite/models/model_utils.py`
 6. Create your dataset code. Make sure the dataset returns a tuple (input, target) for each item or change the code in train and eval.
 
 7. Create a dir for your results
-8. Copy the config file "vphysics/train/train.yml" to your results dir and modify it as needed:
+8. Copy the config file "ml_suite/train/train.yml" to your results dir and modify it as needed:
 - Make sure to set the correct model params
 - use the correct wandb project name and entity
 

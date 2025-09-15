@@ -1,7 +1,7 @@
 import pytest
 import time
 from unittest.mock import patch
-from vphysics.train.utils.time_keeper import TimeKeeper, TimeEstimates
+from ml_suite.train.utils.time_keeper import TimeKeeper, TimeEstimates
 
 
 class TestTimeEstimates:
