@@ -16,10 +16,14 @@ import yaml
 from yaml import CLoader
 
 from vphysics.models.model_utils import get_model
+from vphysics.models.loss_fns import MAE, MSE, RMSE, NRMSE, VRMSE
+
+from vphysics.data.dataloader import get_dataloader
+from vphysics.data.dataset import get_dataset
+
 from vphysics.train.train_base import Trainer
 from vphysics.train.utils.optimizer import get_optimizer
 from vphysics.train.utils.lr_scheduler import get_lr_scheduler
-from vphysics.data.dataloader import get_dataloader
 from vphysics.train.utils.checkpoint_utils import load_checkpoint
 from vphysics.train.utils.wandb_logger import WandbLogger
 
@@ -70,6 +74,22 @@ def main(
     batch_size = int(config["batch_size"])
     num_workers = int(config["num_workers"])
 
+    ############################################################
+    ###### AMP #################################################
+    ############################################################
+    use_amp = config.get("use_amp", True)
+    amp_precision_str = config.get("amp_precision", "bfloat16")
+    if amp_precision_str == "bfloat16":
+        amp_precision = torch.bfloat16
+    elif amp_precision_str == "float16":
+        amp_precision = torch.float16
+    else:
+        print(f"Unknown amp_precision {amp_precision_str}, turing off AMP")
+        use_amp = False
+        amp_precision = torch.float32
+
+    max_grad_norm = config.get("max_grad_norm", None)
+
     torch.set_float32_matmul_precision("high")
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
@@ -79,8 +99,27 @@ def main(
     ############################################################
 
     model = get_model(config["model"])
+    criterion = config["model"].get("criterion", "MSE")
+    if criterion.lower() == "mse":
+        criterion_fn = MSE()
+    elif criterion.lower() == "mae":
+        criterion_fn = MAE()
+    else:
+        raise ValueError(f"Unknown criterion {criterion}")
+
     optimizer = get_optimizer(model, config["optimizer"])
     lr_scheduler = get_lr_scheduler(optimizer, config["lr_scheduler"])
+    dataset = get_dataset(config["dataset"])
+
+    # these are used for evaluation during training (Wandb logging)
+    # these are NOT the loss functions used for training (see criterion)
+    eval_loss_fns = {
+        "MSE": MSE(),
+        "MAE": MAE(),
+        "RMSE": RMSE(),
+        "NRMSE": NRMSE(),
+        "VRMSE": VRMSE(),
+    }
 
     ############################################################
     ###### Load datasets and dataloaders #######################
@@ -145,7 +184,7 @@ def main(
             output_device=device,
         )
 
-    wandb_logger.watch(model, criterion=torch.nn.MSELoss())
+    wandb_logger.watch(model, criterion=criterion_fn)
 
     ############################################################
     ###### Initialize trainer ##################################
@@ -154,13 +193,17 @@ def main(
     trainer = Trainer(
         model=model,
         optimizer=optimizer,
-        criterion=torch.nn.MSELoss(),
+        criterion=criterion_fn,
         lr_scheduler=lr_scheduler,
         train_dataloader=train_dataloader,
         val_dataloader=val_dataloader,
         total_updates=total_updates,
         updates_per_epoch=updates_per_epoch,
         checkpoint_every_updates=cp_every_updates,
+        loss_fns=eval_loss_fns,
+        amp=use_amp,
+        amp_precision=amp_precision,
+        max_grad_norm=max_grad_norm,
         output_dir=output_dir,
         wandb_logger=wandb_logger,
         time_limit=time_limit,

@@ -65,6 +65,12 @@ class Trainer:
     loss_fns : dict
         Dictionary of additional loss functions for metric computation.
         The criterion should be also included in this dictionary.
+    max_grad_norm : float, optional
+        Maximum gradient norm for gradient clipping. If None, no clipping is applied.
+    amp : bool, optional
+        Whether to use automatic mixed precision (AMP) for training, by default True.
+    amp_precision : torch.dtype, optional
+        Precision to use for AMP (e.g., torch.float16, torch.bfloat16), by default torch.bfloat16.
     time_limit : float, optional
         Time limit (in seconds) for training. If specified, training will stop
         gracefully before this limit is reached.
@@ -76,21 +82,6 @@ class Trainer:
         Local rank of current process within a node.
     world_size : int, default 1
         Total number of processes in distributed training.
-
-    Attributes
-    ----------
-    state : TrainingState
-        TrainingState object tracking current training progress.
-    device : torch.device
-        PyTorch device (CUDA or CPU) used for training.
-    ddp_enabled : bool
-        Boolean indicating if distributed training is active.
-    use_amp : bool
-        Boolean indicating if automatic mixed precision is enabled.
-    scaler : GradScaler
-        GradScaler for automatic mixed precision training.
-    time_keeper : TimeKeeper
-        TimeKeeper instance for managing training time limits.
 
     Examples
     --------
@@ -123,6 +114,9 @@ class Trainer:
         checkpoint_every_updates: int,
         output_dir: Path,
         loss_fns: dict,
+        amp: bool = True,
+        amp_precision: torch.dtype = torch.bfloat16,
+        max_grad_norm: Optional[float] = None,
         time_limit: Optional[float] = None,
         wandb_logger: Optional[WandbLogger] = None,
         global_rank: int = 0,
@@ -150,6 +144,9 @@ class Trainer:
         self.time_keeper = TimeKeeper(time_limit=time_limit, global_rank=global_rank)
 
         self.loss_fns = loss_fns
+        self.max_grad_norm = max_grad_norm
+        self.use_amp = amp
+        self.amp_precision = amp_precision
 
         self.device = (
             torch.device(f"cuda:{self.local_rank}")
@@ -244,6 +241,8 @@ class Trainer:
             dataloader=self.val_dataloader,
             metrics=self.loss_fns,
             eval_dir=epoch_dir,
+            amp=self.use_amp,
+            amp_precision=self.amp_precision,
             global_rank=self.global_rank,
             local_rank=self.local_rank,
             world_size=self.world_size,
@@ -289,15 +288,27 @@ class Trainer:
             target = target.to(self.device)
 
             self.optimizer.zero_grad()
-            with torch.autocast(device_type=self.device.type, dtype=torch.bfloat16):
+            with torch.autocast(
+                device_type=self.device.type,
+                dtype=self.amp_precision,
+                enabled=self.use_amp,
+            ):
                 output = self.model(x)
                 raw_loss = self.criterion(output, target)
-                self.scaler.scale(raw_loss).backward()
-                self.scaler.step(self.optimizer)
-                self.scaler.update()
 
-                current_metrics = compute_metrics(output, target, self.loss_fns)
-                current_metrics = reduce_all_losses(current_metrics)
+            self.scaler.scale(raw_loss).backward()
+            self.scaler.unscale_(self.optimizer)
+            if self.max_grad_norm is not None:
+                # Clip gradients to norm 1
+                torch.nn.utils.clip_grad_norm_(
+                    self.model.parameters(),
+                    max_norm=self.max_grad_norm,
+                )
+            self.scaler.step(self.optimizer)
+            self.scaler.update()
+
+            current_metrics = compute_metrics(output, target, self.loss_fns)
+            current_metrics = reduce_all_losses(current_metrics)
 
             if self.lr_scheduler is not None:
                 self.lr_scheduler.step()

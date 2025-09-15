@@ -131,10 +131,13 @@ class TestTrainer:
             total_updates=100,
             updates_per_epoch=10,
             checkpoint_every_updates=50,
-            loss_fns={"RMSE": RMSE(dims=None)},
             output_dir=temp_output_dir,
-            wandb_logger=None,
+            loss_fns={"RMSE": RMSE(dims=None)},
+            amp=True,
+            amp_precision=torch.bfloat16,
+            max_grad_norm=None,
             time_limit=None,
+            wandb_logger=None,
             global_rank=0,
             local_rank=0,
             world_size=1,
@@ -185,11 +188,11 @@ class TestTrainer:
             lr_scheduler=real_lr_scheduler,
             train_dataloader=real_dataloader,
             val_dataloader=real_dataloader,
-            checkpoint_every_updates=50,
-            loss_fns={"RMSE": RMSE(dims=None)},
             total_updates=100,
             updates_per_epoch=10,
+            checkpoint_every_updates=50,
             output_dir=temp_output_dir,
+            loss_fns={"RMSE": RMSE(dims=None)},
         )
 
         initial_batches = trainer.state.batches_trained
@@ -224,11 +227,11 @@ class TestTrainer:
             lr_scheduler=real_lr_scheduler,
             train_dataloader=real_dataloader,
             val_dataloader=real_dataloader,
-            checkpoint_every_updates=50,
-            loss_fns={"RMSE": RMSE(dims=None)},
             total_updates=100,
             updates_per_epoch=10,
+            checkpoint_every_updates=50,
             output_dir=temp_output_dir,
+            loss_fns={"RMSE": RMSE(dims=None)},
         )
 
         # Run validation
@@ -251,11 +254,11 @@ class TestTrainer:
             lr_scheduler=real_lr_scheduler,
             train_dataloader=real_dataloader,
             val_dataloader=real_dataloader,
-            checkpoint_every_updates=50,
-            loss_fns={"RMSE": RMSE(dims=None)},
             total_updates=2,  # Small number for testing
             updates_per_epoch=1,
+            checkpoint_every_updates=50,
             output_dir=temp_output_dir,
+            loss_fns={"RMSE": RMSE(dims=None)},
         )
         # Run training
         trainer.run()
@@ -277,11 +280,11 @@ class TestTrainer:
             lr_scheduler=real_lr_scheduler,
             train_dataloader=real_dataloader,
             val_dataloader=real_dataloader,
-            checkpoint_every_updates=50,
-            loss_fns={"RMSE": RMSE(dims=None)},
             total_updates=100,
             updates_per_epoch=10,
+            checkpoint_every_updates=50,
             output_dir=temp_output_dir,
+            loss_fns={"RMSE": RMSE(dims=None)},
             time_limit=0,  # no time limit
         )
         # Run training

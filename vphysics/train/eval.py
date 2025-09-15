@@ -44,6 +44,8 @@ class Evaluator:
         dataloader: DataLoader,
         metrics: dict[str, torch.nn.Module],
         eval_dir: Path,
+        amp: bool = True,
+        amp_precision: torch.dtype = torch.bfloat16,
         global_rank: int = 0,
         local_rank: int = 0,
         world_size: int = 1,
@@ -68,6 +70,9 @@ class Evaluator:
         self.metrics = metrics
         self.eval_dir = eval_dir
         self.eval_dir.mkdir(parents=True, exist_ok=True)
+
+        self.use_amp = amp
+        self.amp_precision = amp_precision
 
     def log_msg(self, msg: str):
         """Log a message."""
@@ -97,9 +102,14 @@ class Evaluator:
 
             x = x.to(self.device)
             target = target.to(self.device)
-            with torch.amp.autocast(device_type=self.device.type, dtype=torch.bfloat16):
+            with torch.autocast(
+                device_type=self.device.type,
+                dtype=self.amp_precision,
+                enabled=self.use_amp,
+            ):
                 y = self.model(x)
-                current_metrics = compute_metrics(y, target, self.metrics)
+
+            current_metrics = compute_metrics(y, target, self.metrics)
 
             current_metrics = reduce_all_losses(current_metrics)
             for metric_name, metric_value in current_metrics.items():
