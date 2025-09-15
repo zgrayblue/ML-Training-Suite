@@ -172,6 +172,7 @@ class Trainer:
         )
 
     def run(self):
+        self.log_msg("Starting training")
         while self.state.batches_trained < self.total_updates:
             epoch_dir = self.output_dir / f"epoch_{self.state.epoch:04d}"
             epoch_dir.mkdir(parents=True, exist_ok=True)
@@ -187,6 +188,7 @@ class Trainer:
 
             if self.state.shutdown:
                 break
+            self.log_msg(f"Starting epoch {self.state.epoch}")
             self.train_updates(n_updates=self.updates_per_epoch, epoch=self.state.epoch)
 
             # Save epoch checkpoint
@@ -329,6 +331,12 @@ class Trainer:
                 }
                 self.wandb_logger.log(log_state, folder="train", commit=False)
                 self.wandb_logger.log(current_metrics, folder="train", commit=True)
+
+            if (i + 1) % 100 == 0 or i == n_updates - 1:
+                self.log_msg(
+                    f"Epoch {self.state.epoch:03d} | Update {i + 1}/{n_updates} | "
+                    + " | ".join([f"{k}: {v:.4f}" for k, v in current_metrics.items()])
+                )
 
             ###################################################################################
             ######################## Checkpointing ############################################
