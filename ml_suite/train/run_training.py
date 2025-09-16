@@ -116,6 +116,7 @@ def main(
     ############################################################
 
     model = get_model(config["model"])
+    model.to(device)
     criterion = config["model"].get("criterion", "MSE")
     if criterion.lower() == "mse":
         criterion_fn = MSE()
@@ -210,7 +211,6 @@ def main(
     ############################################################
     ###### Compile and distribute model #########################
     ############################################################
-    model.to(device)
     functorch_config.activation_memory_budget = config.get("mem_budget", 1)
     compile_model = config.get("compile", False)
     if compile_model and not platform.system() == "Windows":
