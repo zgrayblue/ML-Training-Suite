@@ -28,8 +28,9 @@ pip install pyyaml python-dotenv pytest wandb
 
 ```bash
 WANDB_API_KEY=your_api_key_here
-BASE_DIR=/path/to/your/base/dir
-DATA_DIR=/path/to/your/data/dir
+BASE_DIR=/path/to/your/base/dir # path to this repo
+DATA_DIR=/path/to/your/data/dir # path to where your data is stored, should be reused
+RESULTS_DIR=/path/to/your/results/dir # checkpoints and wandb files are stored here
 ```
 
 4. (Optional) Set up WandB account and project for experiment tracking
