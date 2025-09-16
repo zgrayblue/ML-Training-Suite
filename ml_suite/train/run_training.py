@@ -126,7 +126,9 @@ def main(
         raise ValueError(f"Unknown criterion {criterion}")
 
     optimizer = get_optimizer(model, config["optimizer"])
-    dataset = get_dataset(config["dataset"])
+    dataset_train = get_dataset(config["dataset"], split="train")
+    dataset_val = get_dataset(config["dataset"], split="valid")
+    
     lr_config = config.get("lr_scheduler", None)
     if lr_config is not None:
         lr_scheduler = get_lr_scheduler(
@@ -153,7 +155,7 @@ def main(
     ############################################################
 
     train_dataloader = get_dataloader(
-        dataset=dataset,
+        dataset=dataset_train,
         seed=seed,
         batch_size=batch_size,
         num_workers=num_workers,
@@ -161,7 +163,7 @@ def main(
         shuffle=True,
     )
     val_dataloader = get_dataloader(
-        dataset=dataset,
+        dataset=dataset_val,
         seed=seed,
         batch_size=batch_size,
         num_workers=num_workers,
