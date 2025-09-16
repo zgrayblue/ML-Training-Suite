@@ -26,6 +26,7 @@ from ml_suite.train.utils.optimizer import get_optimizer
 from ml_suite.train.utils.lr_scheduler import get_lr_scheduler
 from ml_suite.train.utils.checkpoint_utils import load_checkpoint
 from ml_suite.train.utils.wandb_logger import WandbLogger
+from ml_suite.train.utils.logger import setup_logger
 
 
 def load_config(config_path: Path) -> dict:
@@ -47,6 +48,7 @@ def get_checkpoint_path(output_dir: Path, checkpoint_name: str) -> Path:
         checkpoint_path = output_dir / f"epoch_{checkpoint_name}/checkpoint.pt"
     else:
         raise ValueError(f"Invalid checkpoint name: {checkpoint_name}")
+
     return checkpoint_path
 
 
@@ -55,6 +57,8 @@ def main(
     config_path: Path,
 ):
     load_dotenv()
+
+    logger = setup_logger("Startup")
 
     local_rank = int(os.environ.get("LOCAL_RANK", 0))
     global_rank = int(os.environ.get("RANK", 0))
@@ -172,27 +176,36 @@ def main(
     cp_config: dict = config.get("checkpoint", {})
     checkpoint_name = cp_config.get("checkpoint_name", None)
     if checkpoint_name is not None:
+        logger.info(f"Loading checkpoint: {checkpoint_name}")
         checkpoint_path = get_checkpoint_path(output_dir, checkpoint_name)
-        checkpoint = load_checkpoint(checkpoint_path, device)
-        model.load_state_dict(checkpoint["model_state_dict"], strict=True)
-        if cp_config.get("restart", True):
-            optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
 
-            grad_scaler_sd = checkpoint["grad_scaler_state_dict"]
+        if checkpoint_path.exists():
+            logger.info(f"Loading checkpoint from {checkpoint_path}")
 
-            samples_trained = checkpoint["samples_trained"]
-            batches_trained = checkpoint["batches_trained"]
-            epoch = checkpoint["epoch"]
+            checkpoint = load_checkpoint(checkpoint_path, device)
+            model.load_state_dict(checkpoint["model_state_dict"], strict=True)
+            if cp_config.get("restart", True):
+                optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
 
-            if lr_scheduler and lr_config is not None:
-                # we have to recreate lr-s with correct batches trained
-                lr_scheduler = get_lr_scheduler(
-                    optimizer,
-                    lr_config,
-                    total_batches=total_updates,
-                    total_batches_trained=batches_trained,
-                )
-                lr_scheduler.load_state_dict(checkpoint["scheduler_state_dict"])
+                grad_scaler_sd = checkpoint["grad_scaler_state_dict"]
+
+                samples_trained = checkpoint["samples_trained"]
+                batches_trained = checkpoint["batches_trained"]
+                epoch = checkpoint["epoch"]
+
+                if lr_scheduler and lr_config is not None:
+                    # we have to recreate lr-s with correct batches trained
+                    lr_scheduler = get_lr_scheduler(
+                        optimizer,
+                        lr_config,
+                        total_batches=total_updates,
+                        total_batches_trained=batches_trained,
+                    )
+                    lr_scheduler.load_state_dict(checkpoint["scheduler_state_dict"])
+        else:
+            logger.warning(
+                f"Checkpoint {checkpoint_path} not found, starting from scratch"
+            )
 
     ############################################################
     ###### Compile and distribute model #########################
