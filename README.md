@@ -32,6 +32,7 @@ conda create -n train_env python=3.13
 conda activate train_env
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu129
 pip install pyyaml python-dotenv pytest wandb
+pip install -e .
 ```
 
 3. Create a ``.env`` file with necessary environment variables in the top level directory. We do this to avoid hardcoding paths and sensitive information in the code. This way, you can use different .env files for different setups (local, HPC, etc.). Also, you can easily publish your code without exposing sensitive information. The base dir and results dir are used in the sh script to start the run. Use the data dir in your dataset code.
