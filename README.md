@@ -30,7 +30,7 @@ The main part of the suite is located in the train directory.
 2. Install the required dependencies in a conda environment. Of course, also install your own dependencies if needed, you don't have to use conda but some form of environment management is recommended.
 
 ```bash
-conda create -n train_env python=3.13
+conda create -n train_env python
 conda activate train_env
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu129
 pip install pyyaml python-dotenv pytest wandb
@@ -43,7 +43,7 @@ pip install -e .
 WANDB_API_KEY=your_api_key_here
 BASE_DIR=/path/to/your/base/dir # path to this repo
 DATA_DIR=/path/to/your/data/dir # path to where your data is stored, should be reused
-RESULTS_DIR=/path/to/your/results/dir # checkpoints and wandb files are stored here
+RESULTS_DIR=/Users/zoegray/Desktop/ML-Training-Suite/results # checkpoints and wandb files are stored here
 ```
 
 4. (Optional) Set up your [WandB account](https://wandb.ai/site/models/) and project for experiment tracking. Highly recommended!
