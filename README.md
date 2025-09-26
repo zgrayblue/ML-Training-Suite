@@ -1,7 +1,5 @@
 # ML Training and Inference Suite
 
-hello 
-
 This repository contains a suite of tools and scripts for training and inference of machine learning models.
 The suite includes functionalities for data preprocessing, model training, evaluation, and deployment.
 
@@ -27,11 +25,13 @@ The main part of the suite is located in the train directory.
 
 ## Instructions
 1. Fork / copy the repository
-2. Install the required dependencies in a conda environment. Of course, also install your own dependencies if needed, you don't have to use conda but some form of environment management is recommended.
+2. Install the required dependencies in a conda environment. Of course, also install your own dependencies if needed, you don't have to use conda but some form of environment management is recommended. Only do module load miniforge if using Rivanna (UVA HPC).
 
 ```bash
-conda create -n train_env python
-conda activate train_env
+module load miniforge
+
+conda create -n ML_training_suite_env python
+conda activate ML_training_suite_env
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu129
 pip install pyyaml python-dotenv pytest wandb
 pip install -e .
@@ -50,18 +50,16 @@ RESULTS_DIR=/Users/zoegray/Desktop/ML-Training-Suite/results # checkpoints and w
 5. Add your model code in the models directory and update the ``get_model`` function in `ml_suite/models/model_utils.py`. Currently, the function gets a config dictionary and returns a model instance. You can change this as needed.
 6. Create your dataset code. Make sure the dataset returns a tuple (input, target) for each item or change the code in train and eval.
 7. Check out the loss functions `ml_suite/models/loss_fns.py` and add missing ones.
-
-7. Create a dir for your results
-8. Copy the config file "ml_suite/train/train.yml" to your results dir and modify it as needed. We copy the config file to the results dir to keep track of the exact config used for each run. Important things to change:
+8. Create a dir for your results
+9. Copy the config file "ml_suite/train/train.yml" to your results dir and modify it as needed. We copy the config file to the results dir to keep track of the exact config used for each run. Important things to change:
 - dataset params
 - Make sure to set the correct model params
 - check if your model can be compiled with torch.compile
 - training params (batch size, learning rate, number of updates, etc.)
 - use the correct wandb project name and entity
 
-9. Run the vphysics/train/scripts/train_riv.sh
+10. Run the vphysics/train/scripts/train_riv.sh
 - Make sure set the correct conda env name here or the python path if not using conda
--
 
 ## Notes
 
