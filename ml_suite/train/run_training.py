@@ -83,6 +83,7 @@ def main(
     )  # first float to allow yaml scientific notation
     updates_per_epoch = int(float(config["updates_per_epoch"]))
     cp_every_updates = int(float(config["checkpoint_every_updates"]))
+    checkpoint_save_rate = int(float(config["checkpoint_save_rate"]))
     wandb_logger = WandbLogger(config["wandb"], log_dir=output_dir)
 
     samples_trained = 0
@@ -240,6 +241,7 @@ def main(
         total_updates=total_updates,
         updates_per_epoch=updates_per_epoch,
         checkpoint_every_updates=cp_every_updates,
+        checkpoint_save_rate=checkpoint_save_rate,
         loss_fns=eval_loss_fns,
         amp=use_amp,
         amp_precision=amp_precision,

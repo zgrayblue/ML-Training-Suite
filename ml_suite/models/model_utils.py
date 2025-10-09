@@ -18,7 +18,7 @@ def get_activation(name: str):
     return ACTIVATION_MAP[name]()
 
 def get_model(model_config: dict) -> nn.Module:
-    name = model_config.get("name", "").lower()
+    name = model_config["name"].lower()
 
     if name == "conv_ae":
         layers = model_config["layers"]

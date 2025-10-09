@@ -60,6 +60,8 @@ class Trainer:
         Number of updates to perform per epoch (before eval is done again).
     checkpoint_every_updates : int
         Frequency of checkpoint saves (in updates).
+    checkpoint_save_rate: int
+        Rate limits the checkpoint saves. !!!similar to checkpoint_every_updates!!!
     output_dir : Path
         Directory path where checkpoints and logs will be saved.
     loss_fns : dict
@@ -95,6 +97,7 @@ class Trainer:
     ...     total_updates=10000,
     ...     updates_per_epoch=1000,
     ...     checkpoint_every_updates=500,
+    ...     checkpoint_save_rate = 25
     ...     output_dir=Path("./outputs"),
     ...     loss_fns={"rmse": RMSE()}
     ... )
@@ -112,6 +115,7 @@ class Trainer:
         total_updates: int,
         updates_per_epoch: int,
         checkpoint_every_updates: int,
+        checkpoint_save_rate: int,
         output_dir: Path,
         loss_fns: dict,
         amp: bool = True,
@@ -140,6 +144,7 @@ class Trainer:
         self.total_updates = total_updates
         self.updates_per_epoch = updates_per_epoch
         self.checkpoint_every_updates = checkpoint_every_updates
+        self.checkpoint_save_rate = checkpoint_save_rate
 
         self.time_keeper = TimeKeeper(time_limit=time_limit, global_rank=global_rank)
 
@@ -174,8 +179,9 @@ class Trainer:
     def run(self):
         self.log_msg("Starting training")
         while self.state.batches_trained < self.total_updates:
-            epoch_dir = self.output_dir / f"epoch_{self.state.epoch:04d}"
-            epoch_dir.mkdir(parents=True, exist_ok=True)
+            if self.state.epoch % self.checkpoint_save_rate == 0:
+                epoch_dir = self.output_dir / f"epoch_{self.state.epoch:04d}"
+                epoch_dir.mkdir(parents=True, exist_ok=True)
             ###################################################################################
             ######################## Update state #############################################
             ###################################################################################
@@ -192,16 +198,17 @@ class Trainer:
             self.train_updates(n_updates=self.updates_per_epoch, epoch=self.state.epoch)
 
             # Save epoch checkpoint
-            save_checkpoint(
-                checkpoint_path=epoch_dir / "checkpoint.pt",
-                model=self.model,
-                optimizer=self.optimizer,
-                samples_trained=self.state.samples_trained,
-                batches_trained=self.state.batches_trained,
-                epoch=self.state.epoch,
-                grad_scaler=self.scaler,
-                scheduler=self.lr_scheduler,
-            )
+            if self.state.epoch % self.checkpoint_save_rate == 0:
+                save_checkpoint(
+                    checkpoint_path=epoch_dir / "checkpoint.pt",
+                    model=self.model,
+                    optimizer=self.optimizer,
+                    samples_trained=self.state.samples_trained,
+                    batches_trained=self.state.batches_trained,
+                    epoch=self.state.epoch,
+                    grad_scaler=self.scaler,
+                    scheduler=self.lr_scheduler,
+                )
 
             ###################################################################################
             ######################## Validate #################################################
@@ -215,7 +222,9 @@ class Trainer:
 
             if self.state.shutdown:
                 break
-            self.validate(epoch=self.state.epoch)
+            
+            if self.state.epoch % self.checkpoint_save_rate == 0:
+                self.validate(epoch=self.state.epoch)
 
             self.time_keeper.update_estimate(
                 time.time() - self.time_keeper.time_start,
@@ -224,16 +233,17 @@ class Trainer:
             )
             self.state.epoch += 1
 
-        save_checkpoint(
-            checkpoint_path=self.output_dir / "latest.pt",
-            model=self.model,
-            optimizer=self.optimizer,
-            samples_trained=self.state.samples_trained,
-            batches_trained=self.state.batches_trained,
-            epoch=self.state.epoch,
-            grad_scaler=self.scaler,
-            scheduler=self.lr_scheduler,
-        )
+        if self.state.epoch % self.checkpoint_save_rate == 0:
+            save_checkpoint(
+                checkpoint_path=self.output_dir / "latest.pt",
+                model=self.model,
+                optimizer=self.optimizer,
+                samples_trained=self.state.samples_trained,
+                batches_trained=self.state.batches_trained,
+                epoch=self.state.epoch,
+                grad_scaler=self.scaler,
+                scheduler=self.lr_scheduler,
+            )
 
     def validate(self, epoch: int) -> None:
         epoch_dir = self.output_dir / f"epoch_{epoch:04d}"

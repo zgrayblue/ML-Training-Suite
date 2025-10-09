@@ -45,6 +45,9 @@
 # Format: HH:MM:SS
 time_limit="24:00:00"
 
+# Load Miniforge module (adds conda to PATH on compute nodes)
+module load miniforge
+
 # activate conda environment
 export CONDA_ROOT=$HOME/miniforge3
 source $CONDA_ROOT/etc/profile.d/conda.sh
