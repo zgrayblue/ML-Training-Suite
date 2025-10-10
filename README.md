@@ -28,12 +28,10 @@ The main part of the suite is located in the train directory.
 2. Install the required dependencies in a conda environment. Of course, also install your own dependencies if needed, you don't have to use conda but some form of environment management is recommended. Only do module load miniforge if using Rivanna (UVA HPC).
 
 ```bash
-module load miniforge
-
 conda create -n ML_training_suite_env python
 conda activate ML_training_suite_env
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu129
-pip install pyyaml python-dotenv pytest wandb
+pip install pyyaml python-dotenv pytest wandb einops
 pip install -e .
 ```
 

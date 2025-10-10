@@ -28,7 +28,8 @@ seed: 42
 batch_size: 64 # batch size per GPU!!!!
 total_updates: 600e3 # number of batches to use for training
 updates_per_epoch: 1000 # number of updates per epoch
-checkpoint_every_updates: 1e3 # number of updates between checkpoints
+checkpoint_every_updates: 1e3 # number of updates between latest.pt checkpoints
+checkpoint_save_rate: 5  # save checkpoint every X epochs
 
 amp: true # use automatic mixed precision
 precision: bfloat16 # precision for automatic mixed precision (float16, bfloat16)
@@ -92,6 +93,7 @@ lr_scheduler:
 wandb:
   project: my_ml_project
   entity: my_wandb_username
+  id: test # default id for wandb run, change when not resuming a run
   tags:
     - train
     - test

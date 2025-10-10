@@ -127,8 +127,10 @@ def main(
         raise ValueError(f"Unknown criterion {criterion}")
 
     optimizer = get_optimizer(model, config["optimizer"])
-    dataset_train = get_dataset(config["dataset"], split="train")
-    dataset_val = get_dataset(config["dataset"], split="valid")
+    # dataset_train = get_dataset(config["dataset"], split="train") # old for CIFAR
+    # dataset_val = get_dataset(config["dataset"], split="valid")
+    dataset_train = get_dataset(data_dir=Path(config["dataset"]["data_dir"])/"train") # new for the well
+    dataset_val = get_dataset(data_dir=Path(config["dataset"]["data_dir"])/"valid")
     
     lr_config = config.get("lr_scheduler", None)
     if lr_config is not None:

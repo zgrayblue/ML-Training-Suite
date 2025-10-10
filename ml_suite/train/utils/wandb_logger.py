@@ -46,7 +46,7 @@ class WandbLogger:
     def _initialize_wandb(self) -> None:
         """Initialize wandb with error handling."""
         try:
-            wandb_id = self.config.get("id", "test2")
+            wandb_id = self.config.get("id", "test")
             project = self.config.get("project")
             entity = self.config.get("entity")
             tags = self.config.get("tags", [])

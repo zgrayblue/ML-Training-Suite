@@ -45,18 +45,22 @@
 # Format: HH:MM:SS
 time_limit="24:00:00"
 
-# Load Miniforge module (adds conda to PATH on compute nodes)
-module load miniforge
-
 # activate conda environment
 export CONDA_ROOT=$HOME/miniforge3
 source $CONDA_ROOT/etc/profile.d/conda.sh
 export PATH="$CONDA_ROOT/bin:$PATH"
 conda activate train_env
 
-# Load environment variables from .env file
-if [ -f "$HOME/Coding/ML-Training-Suite/.env" ]; then
-    export $(grep -v '^#' "$HOME/Coding/ML-Training-Suite/.env" | xargs)
+# # Load environment variables from .env file
+# if [ -f "$HOME/Research/ML-Training-Suite/.env" ]; then
+#     export $(grep -v '^#' "$HOME/Research/ML-Training-Suite/.env" | xargs)
+# fi
+
+# safer way to load .env variables
+if [ -f "$HOME/Research/ML-Training-Suite/.env" ]; then
+    set -a
+    source "$HOME/Research/ML-Training-Suite/.env"
+    set +a
 fi
 
 ######################################################################################
@@ -66,7 +70,7 @@ fi
 sim_name="train" # name of the folder where you placed the yaml config
 
 python_exec="${BASE_DIR}/ml_suite/train/run_training.py"
-config_file="${DATA_DIR}/${sim_name}/train.yaml"
+config_file="${RESULTS_DIR}/${sim_name}/train.yaml"
 
 nnodes=1
 ngpus_per_node=4
